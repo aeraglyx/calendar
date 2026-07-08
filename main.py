@@ -82,8 +82,8 @@ def width_to_chars(w):
     n_middle = 2 * w - 3
     return "╭" + n_middle * "─" + "╯ "
 
-def lines_str(cont_array):
-    line_char_list = [width_to_chars(x["width"]) for x in cont_array]
+def lines_str(line_data):
+    line_char_list = [width_to_chars(x["width"]) for x in line_data]
     return colors.BLACK + "".join(line_char_list) + colors.RESET
 
 def update_line_data(data):
@@ -101,8 +101,8 @@ def update_line_data(data):
         i_new += width_new
     return data_new
 
-line_data = []
 
+line_data = []
 for i, date in enumerate(date_list):
     diff = i - today_offset
     weekday_int = date.weekday()
