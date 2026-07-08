@@ -43,39 +43,39 @@ urgency_map = {
     "high": colors.YELLOW
 }
 
-data_path = os.path.expanduser("~/.local/share/calendar")
-file = os.path.join(data_path, "calendar.json")
-file_recurring = os.path.join(data_path, "repeating.json")
 
-with open(file) as f:
-    calendar_data = json.load(f)
+data_path = os.path.expandvars("$XDG_DATA_HOME/calendar")
 
-with open(file_recurring) as f:
-    calendar_data_recurring = json.load(f)
+calendar_data = []
+for filename in os.listdir(data_path):
+    if filename.startswith("."):
+        continue
+    filepath = os.path.join(data_path, filename)
+    with open(filepath) as f:
+        calendar_data.extend(json.load(f))
+
 
 today = datetime.today()
 today_offset = 7
 date_list = [today.date() + timedelta(days=x-today_offset) for x in range(num_days)]
 
 
+fixed_year = 2000
 data_filtered = {date: [] for date in date_list}
-
 filtered_dates = data_filtered.keys()
+filtered_dates_with_offset = [date.replace(year=fixed_year) for date in filtered_dates]
+
 for entry in calendar_data:
     stamp_str = entry["time"]
     date = datetime.fromisoformat(stamp_str).date()
+    if entry.get("repeat"):
+        date_normalized = date.replace(year=fixed_year)
+        if date_normalized not in filtered_dates_with_offset:
+            continue
     if date not in filtered_dates:
         continue
     data_filtered[date].append(entry)
 
-fixed_year = 2000
-filtered_dates_with_offset = [date.replace(year=fixed_year) for date in data_filtered.keys()]
-for entry in calendar_data_recurring:
-    stamp_str = entry["time"]
-    date = datetime.fromisoformat(stamp_str).date()
-    if date.replace(year=fixed_year) not in filtered_dates_with_offset:
-        continue
-    data_filtered[date].append(entry)
 
 def width_to_chars(w):
     if w == 1: return "│ "
