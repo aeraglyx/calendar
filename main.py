@@ -5,14 +5,17 @@ import re
 import argparse
 import tomllib
 
+
 parser = argparse.ArgumentParser()
 parser.add_argument("-s", "--sensitive", action="store_true")
 args = parser.parse_args()
+
 
 num_days = 42
 
 class colors():
     BLACK = '\033[30m'
+    BLACK_BRIGHT = '\033[90m'
     WHITE = '\033[37m'
 
     RED = '\033[31m'
@@ -21,8 +24,6 @@ class colors():
     CYAN = '\033[36m'
     BLUE = '\033[34m'
     MAGENTA = '\033[35m'
-
-    BLACK_BRIGHT = '\033[90m'
 
     RESET = '\033[0m'
 
@@ -33,16 +34,19 @@ urgency_map = {
 }
 
 
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-config_file_default = os.path.join(SCRIPT_DIR, "config.toml")
-config_file_user = os.path.expandvars("$XDG_CONFIG_HOME/calendar/config.toml")
+def get_config():
+    SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+    config_file_default = os.path.join(SCRIPT_DIR, "config.toml")
+    config_file_user = os.path.expandvars("$XDG_CONFIG_HOME/calendar/config.toml")
 
-with open(config_file_default, "rb") as d:
-    cfg = tomllib.load(d)
+    with open(config_file_default, "rb") as d:
+        cfg = tomllib.load(d)
 
-if os.path.isfile(config_file_user):
-    with open(config_file_user, "rb") as u:
-        cfg.update(tomllib.load(u))
+    if os.path.isfile(config_file_user):
+        with open(config_file_user, "rb") as u:
+            cfg.update(tomllib.load(u))
+
+    return cfg
 
 
 def get_calendar_data(data_path):
@@ -56,29 +60,24 @@ def get_calendar_data(data_path):
     return calendar_data
 
 
-today = datetime.today()
-today_offset = 7
-date_list = [today.date() + timedelta(days=x-today_offset) for x in range(num_days)]
+def get_data_filtered(calendar_data, date_list):
+    fixed_year = 2000
+    data_filtered = {date: [] for date in date_list}
+    filtered_dates = data_filtered.keys()
+    filtered_dates_with_offset = [date.replace(year=fixed_year) for date in filtered_dates]
 
-
-fixed_year = 2000
-data_filtered = {date: [] for date in date_list}
-filtered_dates = data_filtered.keys()
-filtered_dates_with_offset = [date.replace(year=fixed_year) for date in filtered_dates]
-
-data_path = os.path.expanduser(os.path.expandvars(cfg["data_path"]))
-calendar_data = get_calendar_data(data_path)
-
-for entry in calendar_data:
-    stamp_str = entry["time"]
-    date = datetime.fromisoformat(stamp_str).date()
-    if entry.get("repeat"):
-        date_normalized = date.replace(year=fixed_year)
-        if date_normalized not in filtered_dates_with_offset:
+    for entry in calendar_data:
+        stamp_str = entry["time"]
+        date = datetime.fromisoformat(stamp_str).date()
+        if entry.get("repeat"):
+            date_normalized = date.replace(year=fixed_year)
+            if date_normalized not in filtered_dates_with_offset:
+                continue
+        if date not in filtered_dates:
             continue
-    if date not in filtered_dates:
-        continue
-    data_filtered[date].append(entry)
+        data_filtered[date].append(entry)
+
+    return data_filtered
 
 
 def width_to_chars(w):
@@ -86,9 +85,11 @@ def width_to_chars(w):
     n_middle = 2 * w - 3
     return "╭" + n_middle * "─" + "╯ "
 
+
 def lines_str(line_data):
     line_char_list = [width_to_chars(x["width"]) for x in line_data]
     return colors.BLACK + "".join(line_char_list) + colors.RESET
+
 
 def update_line_data(data):
     data_new = []
@@ -104,6 +105,16 @@ def update_line_data(data):
         })
         i_new += width_new
     return data_new
+
+
+cfg = get_config()
+data_path = os.path.expanduser(os.path.expandvars(cfg["data_path"]))
+calendar_data = get_calendar_data(data_path)
+
+today = datetime.today()
+today_offset = 7
+date_list = [today.date() + timedelta(days=x-today_offset) for x in range(num_days)]
+data_filtered = get_data_filtered(calendar_data, date_list)
 
 
 line_data = []
