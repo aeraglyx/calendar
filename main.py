@@ -45,15 +45,15 @@ if os.path.isfile(config_file_user):
         cfg.update(tomllib.load(u))
 
 
-data_path = os.path.expanduser(os.path.expandvars(cfg["data_path"]))
-
-calendar_data = []
-for filename in os.listdir(data_path):
-    if filename.startswith("."):
-        continue
-    filepath = os.path.join(data_path, filename)
-    with open(filepath) as f:
-        calendar_data.extend(json.load(f))
+def get_calendar_data(data_path):
+    calendar_data = []
+    for filename in os.listdir(data_path):
+        if filename.startswith("."):
+            continue
+        filepath = os.path.join(data_path, filename)
+        with open(filepath) as f:
+            calendar_data.extend(json.load(f))
+    return calendar_data
 
 
 today = datetime.today()
@@ -65,6 +65,9 @@ fixed_year = 2000
 data_filtered = {date: [] for date in date_list}
 filtered_dates = data_filtered.keys()
 filtered_dates_with_offset = [date.replace(year=fixed_year) for date in filtered_dates]
+
+data_path = os.path.expanduser(os.path.expandvars(cfg["data_path"]))
+calendar_data = get_calendar_data(data_path)
 
 for entry in calendar_data:
     stamp_str = entry["time"]
