@@ -9,18 +9,6 @@ parser = argparse.ArgumentParser()
 parser.add_argument("-s", "--sensitive", action="store_true")
 args = parser.parse_args()
 
-
-DAY_NAMES = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
-
-icon_map = {
-    "default": "",
-    "secret": "",
-    "home": "",
-    "work": "",
-    "doctor": "",
-    "bills": "",
-}
-
 num_days = 42
 
 class colors():
@@ -119,7 +107,7 @@ line_data = []
 for i, date in enumerate(date_list):
     diff = i - today_offset
     weekday_int = date.weekday()
-    weekday_str = DAY_NAMES[weekday_int]
+    weekday_str = cfg["day_names"][weekday_int]
 
     is_weekend = weekday_int > 4
     weekend_fmt = colors.BLACK if is_weekend else colors.RESET
@@ -163,9 +151,9 @@ for i, date in enumerate(date_list):
         name = urgency_map[event_urgency] + name + colors.RESET
 
         event_type = entry.get("type", "default")
-        icon = icon_map.get(event_type, icon_map["default"])
+        icon = cfg["icon_map"].get(event_type, cfg["icon_default"])
         if is_sensitive:
-            icon = icon_map["secret"]
+            icon = cfg["icon_secret"]
 
         urgency_color = urgency_map[event_urgency]
         icon = urgency_color + icon + colors.RESET

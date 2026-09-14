@@ -1,1 +1,12 @@
 data_path = "$XDG_DATA_HOME/calendar"
+
+day_names = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
+
+icon_default = ""
+icon_secret  = ""
+
+[icon_map]
+home    = ""
+work    = ""
+doctor  = ""
+bills   = ""
