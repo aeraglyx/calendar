@@ -3,6 +3,7 @@ import json
 from datetime import datetime, timedelta
 import re
 import argparse
+import tomllib
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-s", "--sensitive", action="store_true")
@@ -44,7 +45,19 @@ urgency_map = {
 }
 
 
-data_path = os.path.expandvars("$XDG_DATA_HOME/calendar")
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+config_file_default = os.path.join(SCRIPT_DIR, "config.toml")
+config_file_user = os.path.expandvars("$XDG_CONFIG_HOME/calendar/config.toml")
+
+with open(config_file_default, "rb") as d:
+    cfg = tomllib.load(d)
+
+if os.path.isfile(config_file_user):
+    with open(config_file_user, "rb") as u:
+        cfg.update(tomllib.load(u))
+
+
+data_path = os.path.expanduser(os.path.expandvars(cfg["data_path"]))
 
 calendar_data = []
 for filename in os.listdir(data_path):
