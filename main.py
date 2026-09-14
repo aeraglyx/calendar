@@ -122,7 +122,7 @@ for i, date in enumerate(date_list):
 
     separator = "  "
     start_str = separator.join([
-        colors.BLACK + f"{abs(diff):02d}" if diff != 0 else colors.CYAN + "🯩🯫",
+        colors.BLACK + f"{abs(diff):02d}" if diff != 0 else colors.BLUE + "🯩🯫",
         weekend_fmt + date_str,
         weekday_str,
     ])
@@ -176,7 +176,7 @@ for i, date in enumerate(date_list):
 
         lines = lines_str(line_data)
         start = "" if j == 0 else (l + len(separator)) * " " + lines
-        time_str = colors.CYAN + time + " " + colors.RESET if time else ""
+        time_str = colors.BLUE + time + " " + colors.RESET if time else ""
 
         entry_str = f"{start}{icon} {time_str}{name}"
         print(entry_str)
