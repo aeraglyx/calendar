@@ -158,7 +158,6 @@ for i, date in enumerate(date_list):
 
         name = entry["name"]
         if is_sensitive:
-            name = re.sub(r"\S", "*", name)
             name = "redacted"
 
         event_urgency = entry.get("urgency", "normal")
