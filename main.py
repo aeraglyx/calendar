@@ -93,17 +93,17 @@ def lines_str(line_data):
 
 def update_line_data(data):
     data_new = []
-    i_new = 0
+    index_new = 0
     for line in data:
         if line["remaining"] == 1:
             continue
-        width_new = line["position"] - i_new + 1
+        width_new = line["index"] - index_new + 1
         data_new.append({
             "remaining": line["remaining"] - 1,
-            "position": i_new,
+            "index": index_new,
             "width": width_new,
         })
-        i_new += width_new
+        index_new += width_new
     return data_new
 
 
@@ -198,7 +198,7 @@ for i, date in enumerate(date_list):
         if duration_days > 1:
             line_data.append({
                 "remaining": duration_days,
-                "position": sum([x["width"] for x in line_data]),
+                "index": sum([x["width"] for x in line_data]),
                 "width": 1,
             })
 
