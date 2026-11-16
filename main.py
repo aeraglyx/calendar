@@ -62,21 +62,22 @@ def get_calendar_data(data_path):
 
 
 def get_data_filtered(calendar_data, date_list):
-    fixed_year = 2000
     data_filtered = {date: [] for date in date_list}
-    filtered_dates = data_filtered.keys()
-    filtered_dates_with_offset = [date.replace(year=fixed_year) for date in filtered_dates]
+    month_and_day_wanted = [(date.month, date.day) for date in date_list]
 
     for entry in calendar_data:
-        stamp_str = entry["time"]
-        date = datetime.fromisoformat(stamp_str).date()
+        stamp = datetime.fromisoformat(entry["time"]).date()
+        month_and_day = (stamp.month, stamp.day)
+
         if entry.get("repeat"):
-            date_normalized = date.replace(year=fixed_year)
-            if date_normalized not in filtered_dates_with_offset:
+            if month_and_day not in month_and_day_wanted:
                 continue
-        if date not in filtered_dates:
-            continue
-        data_filtered[date].append(entry)
+            for date in date_list:
+                if (date.month, date.day) == month_and_day:
+                    data_filtered[date].append(entry)
+        else:
+            if stamp in data_filtered:
+                data_filtered[stamp].append(entry)
 
     return data_filtered
 
