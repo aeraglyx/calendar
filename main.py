@@ -7,11 +7,10 @@ import tomllib
 
 
 parser = argparse.ArgumentParser()
+parser.add_argument("-n", "--num_days", type=int, default=42)
 parser.add_argument("-s", "--sensitive", action="store_true")
 args = parser.parse_args()
 
-
-num_days = 42
 
 class colors():
     BLACK = '\033[30m'
@@ -113,7 +112,7 @@ calendar_data = get_calendar_data(data_path)
 
 today = datetime.today()
 today_offset = 7
-date_list = [today.date() + timedelta(days=x-today_offset) for x in range(num_days)]
+date_list = [today.date() + timedelta(days=x-today_offset) for x in range(args.num_days)]
 data_filtered = get_data_filtered(calendar_data, date_list)
 
 
