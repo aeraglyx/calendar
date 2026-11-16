@@ -8,6 +8,7 @@ import tomllib
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-n", "--num_days", type=int, default=42)
+parser.add_argument("-o", "--offset", type=int, default=-7)
 parser.add_argument("-c", "--compact", action="store_true")
 parser.add_argument("-s", "--sensitive", action="store_true")
 args = parser.parse_args()
@@ -112,8 +113,7 @@ data_path = os.path.expanduser(os.path.expandvars(cfg["data_path"]))
 calendar_data = get_calendar_data(data_path)
 
 today = datetime.today()
-today_offset = 7
-date_list = [today.date() + timedelta(days=x-today_offset) for x in range(args.num_days)]
+date_list = [today.date() + timedelta(days=x+args.offset) for x in range(args.num_days)]
 data_filtered = get_data_filtered(calendar_data, date_list)
 
 line_data = []
@@ -132,7 +132,7 @@ for i, date in enumerate(date_list):
     if args.compact and not entries:
         continue
 
-    diff = i - today_offset
+    diff = i + args.offset
     weekday_int = date.weekday()
     weekday_str = cfg["day_names"][weekday_int]
 
