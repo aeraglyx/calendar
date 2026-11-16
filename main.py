@@ -173,7 +173,6 @@ for i, date in enumerate(date_list):
             icon = cfg["icon_secret"]
 
         urgency_color = urgency_map[event_urgency]
-        icon = urgency_color + icon + colors.RESET
 
         stamp_str = entry["time"]
         time = datetime.fromisoformat(stamp_str).time()
@@ -195,13 +194,12 @@ for i, date in enumerate(date_list):
             lines = lines_str(line_data)
 
         start = "" if j == 0 else (l + len(separator)) * " " + lines
-        time_str = colors.BLUE + time + " " + colors.RESET if time else ""
+        time_str = time + " | " if time else ""
 
-        days_str = ""
-        if args.compact and duration_days:
-            days_str = colors.YELLOW + str(duration_days) + "d " + colors.RESET
+        show_days = args.compact and duration_days
+        days_str = str(duration_days) + "d | " if show_days else ""
 
-        entry_str = f"{start}{icon} {time_str}{days_str}{name}"
+        entry_str = f"{start}{urgency_color}{icon} {time_str}{days_str}{name}"
         print(entry_str)
 
         if not args.compact and duration_days > 1:
