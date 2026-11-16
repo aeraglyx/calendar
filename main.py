@@ -142,9 +142,9 @@ for i, date in enumerate(date_list):
 
     separator = "  "
     num_col = colors.BLACK_BRIGHT if diff < 0 and args.compact else colors.BLACK
-    start_str = separator.join([
-        num_col + f"{abs(diff):02d}" if diff != 0 else colors.BLUE + "🯩🯫",
-        weekend_fmt + date_str,
+    start_str = "".join([
+        num_col + f"{abs(diff):02d}".ljust(4) if diff != 0 else colors.BLUE + "🯩🯫".ljust(4),
+        weekend_fmt + date_str + separator,
         weekday_str,
     ])
 
