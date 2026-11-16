@@ -129,9 +129,6 @@ for i, date in enumerate(date_list):
     assert entries is not None
 
     date_str = date.strftime("%m-%d")
-    if not is_weekend:
-        dash_dim = f"{colors.BLACK}-{colors.RESET}"
-        date_str = dash_dim.join(date_str.split("-"))
 
     separator = "  "
     start_str = separator.join([
