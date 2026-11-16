@@ -8,6 +8,7 @@ import tomllib
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-n", "--num_days", type=int, default=42)
+parser.add_argument("-c", "--compact", action="store_true")
 parser.add_argument("-s", "--sensitive", action="store_true")
 args = parser.parse_args()
 
@@ -115,19 +116,28 @@ today_offset = 7
 date_list = [today.date() + timedelta(days=x-today_offset) for x in range(args.num_days)]
 data_filtered = get_data_filtered(calendar_data, date_list)
 
-
 line_data = []
+lines = ""
+
 for i, date in enumerate(date_list):
+    entries = data_filtered.get(date)
+    assert entries is not None
+
+    if date.day == 1:
+        term_width = os.get_terminal_size().columns
+        month_str = date.strftime(" %B %Y ")
+        month_line = (term_width - len(month_str) - 3) * "─" + month_str + 3 * "─"
+        print(colors.BLACK + month_line + colors.RESET)
+
+    if args.compact and not entries:
+        continue
+
     diff = i - today_offset
     weekday_int = date.weekday()
     weekday_str = cfg["day_names"][weekday_int]
 
     is_weekend = weekday_int > 4
     weekend_fmt = colors.BLACK if is_weekend else colors.RESET
-
-    entries = data_filtered.get(date)
-    assert entries is not None
-
     date_str = date.strftime("%m-%d")
 
     separator = "  "
@@ -137,17 +147,14 @@ for i, date in enumerate(date_list):
         weekday_str,
     ])
 
+    if not args.compact:
+        lines = lines_str(line_data)
+
+    print(start_str + separator + lines, end = "")
+
     # HACK:
     start_raw = re.sub(r'\033\[\d+m', "", start_str)
     l = len(start_raw)
-
-    if date.day == 1:
-        term_width = os.get_terminal_size().columns
-        month_str = date.strftime(" %B %Y ")
-        print(colors.BLACK + (term_width - len(month_str) - 3) * "─" + month_str + 3 * "─" + colors.RESET)
-
-    lines = lines_str(line_data)
-    print(start_str + separator + lines, end = "")
 
     for j, entry in enumerate(entries):
         is_sensitive = args.sensitive and entry.get("sensitive")
@@ -183,14 +190,20 @@ for i, date in enumerate(date_list):
         if time and time_stop:
             time = time + "-" + time_stop
 
-        lines = lines_str(line_data)
+        if not args.compact:
+            lines = lines_str(line_data)
+
         start = "" if j == 0 else (l + len(separator)) * " " + lines
         time_str = colors.BLUE + time + " " + colors.RESET if time else ""
 
-        entry_str = f"{start}{icon} {time_str}{name}"
+        days_str = ""
+        if args.compact and duration_days:
+            days_str = colors.YELLOW + str(duration_days) + "d " + colors.RESET
+
+        entry_str = f"{start}{icon} {time_str}{days_str}{name}"
         print(entry_str)
 
-        if duration_days > 1:
+        if not args.compact and duration_days > 1:
             line_data.append({
                 "remaining": duration_days,
                 "index": sum([x["width"] for x in line_data]),
