@@ -61,6 +61,28 @@ def get_calendar_data(data_path):
     return calendar_data
 
 
+def get_entry_corrected(entry, year: int):
+    """ return the same entry, but with updated year """
+
+    def offset_year(dt_str: str, year: int) -> str:
+        time = datetime.fromisoformat(dt_str)
+        time_corrected = time.replace(year=year)
+        if "T" not in dt_str:
+            time_corrected = time_corrected.date()
+        return time_corrected.isoformat()
+
+    entry_corrected = entry.copy()
+    entry_corrected["time"] = offset_year(entry["time"], year)
+
+    if "stop" in entry:
+        time = datetime.fromisoformat(entry["time"])
+        stop = datetime.fromisoformat(entry["stop"])
+        year_stop = stop.year + (year - time.year)
+        entry_corrected["stop"] = offset_year(entry["stop"], year_stop)
+
+    return entry_corrected
+
+
 def get_data_filtered(calendar_data, date_list):
     data_filtered = {date: [] for date in date_list}
     month_and_day_wanted = [(date.month, date.day) for date in date_list]
@@ -74,7 +96,8 @@ def get_data_filtered(calendar_data, date_list):
                 continue
             for date in date_list:
                 if (date.month, date.day) == month_and_day:
-                    data_filtered[date].append(entry)
+                    entry_corrected = get_entry_corrected(entry, date.year)
+                    data_filtered[date].append(entry_corrected)
         else:
             if stamp in data_filtered:
                 data_filtered[stamp].append(entry)
