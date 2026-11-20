@@ -35,7 +35,7 @@ urgency_map = {
 }
 
 
-def get_config():
+def get_config() -> dict:
     SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
     config_file_default = os.path.join(SCRIPT_DIR, "config.toml")
     config_file_user = os.path.expandvars("$XDG_CONFIG_HOME/calendar/config.toml")
@@ -50,7 +50,7 @@ def get_config():
     return cfg
 
 
-def get_calendar_data(data_path):
+def get_calendar_data(data_path: str) -> list[dict]:
     calendar_data = []
     for filename in os.listdir(data_path):
         if filename.startswith("."):
@@ -61,7 +61,7 @@ def get_calendar_data(data_path):
     return calendar_data
 
 
-def get_entry_corrected(entry, year: int):
+def get_entry_corrected(entry: dict, year: int) -> dict:
     """ return the same entry, but with updated year """
 
     def offset_year(dt_str: str, year: int) -> str:
@@ -83,7 +83,7 @@ def get_entry_corrected(entry, year: int):
     return entry_corrected
 
 
-def get_data_filtered(calendar_data, date_list):
+def get_data_filtered(calendar_data: list, date_list: list) -> dict:
     data_filtered = {date: [] for date in date_list}
     month_and_day_wanted = [(date.month, date.day) for date in date_list]
 
@@ -105,18 +105,18 @@ def get_data_filtered(calendar_data, date_list):
     return data_filtered
 
 
-def width_to_chars(w):
+def width_to_chars(w: int) -> str:
     if w == 1: return "│ "
-    n_middle = 2 * w - 3
-    return "╭" + n_middle * "─" + "╯ "
+    middle = (2 * w - 3) * "-"
+    return "╭" + middle + "╯ "
 
 
-def lines_str(line_data):
+def lines_str(line_data) -> str:
     line_char_list = [width_to_chars(x["width"]) for x in line_data]
     return colors.BLACK + "".join(line_char_list) + colors.RESET
 
 
-def update_line_data(data):
+def update_line_data(data) -> list[dict]:
     data_new = []
     index_new = 0
     for line in data:
@@ -165,9 +165,9 @@ for i, date in enumerate(date_list):
     date_str = date.strftime("%m-%d")
 
     separator = "  "
-    num_col = colors.BLACK_BRIGHT if diff < 0 and args.compact else colors.BLACK
+    num_color = colors.BLACK_BRIGHT if diff < 0 and args.compact else colors.BLACK
     start_str = "".join([
-        num_col + f"{abs(diff):02d}".ljust(4) if diff != 0 else colors.BLUE + "🯩🯫".ljust(4),
+        num_color + f"{abs(diff):02d}".ljust(4) if diff != 0 else colors.BLUE + "🯩🯫".ljust(4),
         weekend_fmt + date_str + separator,
         weekday_str,
     ])
